@@ -1,0 +1,31 @@
+Project:
+  name: 'sFNO+epsilon_v2'
+  database: 'GRF_7Hz'
+  experiment: '25k'
+
+data:
+  PATH: "databases"
+  PDE_type: "acoustic"
+  process: 'GRF_7Hz'
+  n_sample: 25000
+  load_workers: 10
+  
+model:
+  modes_list: [12, 12, 16, 14]
+  depths: [3, 3,9,3]
+  dims: [30, 30, 32, 38]
+  drop_path: 0.3
+  drop: 0.1
+
+train:
+  batchsize: 30
+  epochs: 200
+  lr: 0.001
+  step_size: 80
+  gamma: 0.5
+  weight_decay: 0.00001
+
+ckpt:
+  PATH: "save_files"
+  save_dir: 'acoustic/GRF_7Hz/sFNO_epsilon_v2'
+  alias: 'sFNO_epsilon_v2'

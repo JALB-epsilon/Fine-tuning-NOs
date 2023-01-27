@@ -1,0 +1,10 @@
+#!/bin/bash
+# FILENAME: fno.sub
+
+module load cuda
+
+echo "current host: " `hostname -s`
+
+source ${HOME}/.bashrc
+
+mpiexec -n 4 --use-hwthread-cpus python3 -E create_surface.py --mpi -p ../databases -c ../config/acoustic/GRF/FNO25k.yaml --filename 'GRF=0-epoch=99.ckpt' --dir_file PCA_weights_save_epoch=99_coplex=split_dim=2/direction_complex.h5 --x -90 20 45  --y -50 50 41 --proj_file PCA_weights_save_epoch=99_complex=split_dim=2/directions.h5_proj_cos.h5 --cuda --ngpu 1 --surf_file FNO_loss_surface_[-90,20]x[-50,50]

@@ -1,0 +1,95 @@
+## 1) Problem information ##############################################
+dimension=2
+frequency_fourier=12,15
+frequency_laplace=0
+
+## 2) Acquisition ######################################################
+file_acquisition_source=../acquisition/sources.txt
+file_acquisition_receiver=../acquisition/receiver_128.txt
+acquisition_receiver_fixed=true
+
+src_depth=10.0 # force here or read in file
+rcv_depth=30.0 # force here or read in file
+source_type=dirac
+source_component=p # {p,vx,vy,vz,sxx,...}
+source_first=1
+# source_last=
+source_step=1
+acquisition_verbose=false
+## source characterization 
+source_time0=0.
+source_timepeak=0.
+source_freqpeak=10.0
+source_ampli=1.0
+source_constant=false # possibility for constant coeff.
+source_constant_real=1.0
+source_constant_imag=0.0
+########################################################################
+
+## 3) model parameters #################################################
+# model_sep_vp=     # model_ascii_vp=  # model_constant_vp  # model_scale_vp
+# model_sep_rho=    # model_ascii_rho= # model_constant_rho # model_scale_rho
+model_sep_vp=../models/wavespeed/cp00001.H
+model_constant_rho=1.0
+model_scale_vp=1
+
+model_representation=sep-original
+# model_representation=dof # sep-original
+# model_representation_polynomial_order_vp=2
+
+viscosity=false
+viscosity_model=kolsky-futterman
+model_sep_visco=
+model_scale_visco=1.0
+########################################################################
+
+## 4) grid information #################################################
+##    using mesh or cartesian grid 
+##    either we read from an input sep or we can specify directly
+mesh_file=../models/mesh/mesh.1
+mesh_format=triangle
+mesh_partition=metis
+# boundary tag infos: flag if any and list of tags
+mesh_tag_absorbing=2,3,4
+mesh_tag_planewave=
+mesh_tag_free-surface=1
+mesh_tag_wall-surface=
+
+# polynomial infos, file if order<=0
+evaluate_int_quadrature=true
+polynomial_order=4
+polynomial_order_min=4
+polynomial_order_max=7
+polynomial_order_file=
+########################################################################
+
+## 5) solver ###########################################################
+mumps_analysis=1          #0=AUTO, 1=SEQUENTIAL, 2=PARALLEL
+mumps_partitioner_seq=3   #0=AMD, 1=PIVOT, 2=AMF, 3=SCOTCH, 4=PORD, 5=METIS, 6=MINDEG, 7=AUTO
+mumps_partitioner_par=1   #0=AUTO, 1=PT_SCOTCH,  2=PARMETIS
+mumps_lowrank=0
+mumps_lowrank_tol=1e-5
+mumps_lowrank_variant=0
+mumps_cb_compress=0
+mumps_advanced_experimental=1
+mumps_memory_increase_percent=100
+mumps_multithread_tree=1
+mumps_block_structure=1
+mumps_verbose=0
+mumps_root_parallel=1
+parallel_rhs=512
+########################################################################
+
+## 6) io ###############################################################
+workpath=./results/
+save_wavefield=true
+save_receivers=false
+save_structured_vtk=false
+save_structured_sep=true
+save_unstructured_vtk=false
+save_wavefield_component=p
+save_receivers_component=p
+dx=20.15873015873016 # for structured save, we need the discretization
+dy=20.15873015873016 # for structured save, we need the discretization
+dz=20.15873015873016 # for structured save, we need the discretization
+########################################################################

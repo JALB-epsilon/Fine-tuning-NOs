@@ -1,0 +1,11 @@
+*.pyc
+*.ckpt
+*.npy
+*lightning_logs/
+*save_files/
+*.txt
+*databases/
+phase_plots.py
+test_ideas.py
+test_ideas.py
+*lightning_logs/

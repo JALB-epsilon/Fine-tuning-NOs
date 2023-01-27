@@ -1,0 +1,21 @@
+name: forward-operator
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - matplotlib==3.6.1
+  - python==3.10.*
+  - pytorch==1.12.*
+  - torchvision==0.13.*
+  - pip
+  - pip:
+    - PyYAML==6.0
+    - timm==0.6.*
+    - pytorch-lightning==1.8.*
+    - pytorch-wavelet==1.2.*
+    - torchmetrics==0.10.*
+    - seaborn==0.12.*
+    - h5py==3.7.0
+    - scikit-learn==1.2.0
+    - mpi4py==3.1.4
