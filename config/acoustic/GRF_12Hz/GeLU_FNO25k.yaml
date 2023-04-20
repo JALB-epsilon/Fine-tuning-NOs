@@ -9,7 +9,8 @@ data:
   process: 'GRF_12Hz'
   n_sample: 25000
   load_workers: 10
-  
+  frequency: 12
+    
 model:
   modes_list: [12,12,12,12]
   features: 36
