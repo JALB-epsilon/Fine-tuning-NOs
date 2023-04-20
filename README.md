@@ -1,17 +1,30 @@
-# Fine-tuning Neural-Operator architectures for training and generalization.
-This is the official implementation of the paper "Fine-tuning Neural-Operator architectures for training and generalization".
+# Fine-tuning Neural-Operator Architectures for Training and Generalization
 
-## Get started (Libraries)
-If you want to reproduce all the results (including the baselines) shown in the paper,
+This is the official implementation of the paper "Fine-tuning Neural-Operator Architectures for Training and Generalization".
 
-You can then set up a conda environment with all dependencies like so:
-```
-conda env create -f environment.yaml
-conda activate forward-operator
-```
+> **Title:** Fine-tuning Neural-Operator Architectures for Training and Generalization
+
+> **Author(s):** Jose Antonio Lara Benitez, Takashi Furuya, Florian Faucher, Xavier Tricoche, and Maarten V de Hoop
+
+> **Source:** [arXiv preprint arXiv:2301.11509](https://arxiv.org/abs/2301.11509)
+
+> **Year:** 2023
+
+
+
+## Get Started (Libraries)
+
+To reproduce all the results, including the baselines, shown in the paper, follow these steps:
+
+1. Set up a conda environment with all dependencies using the provided `environment.yaml` file:
+    ```bash
+    conda env create -f environment.yaml
+    conda activate forward-operator
+    ```
+2. Proceed with running the code or experiments as described in the paper.
 
 ## Dataset 
-The data set is proportioned upon request. It must be located in a directory with the following structure:
+The data set is presented here [Official data set](https://rice.app.box.com/s/haczq8oad4b5cvi8pf8cp01sz4f0vfey)  It must be located in a directory with the following structure:
 ```
 databases/acoustic/GRF_{Freq}Hz/data
 databases/acoustic/GRF_{Freq}Hz/model
@@ -40,17 +53,26 @@ We train multiple times in the code. The evaluation is a function of the amoung 
 CUDA_VISIBLE_DEVICES={k} python3 evaluation.py -n <number_training_save_model> -c <path_to_config_file>
 ```
 
-### Plot (no visualization)
-The same structure follows for plotting
-
-```
- python3 reconstruction_plot.py -c <path_to_config_file>
-```
-
 ### Loss Landscape visualization
 ```
 visualization_code
 ```
+
+## Remarks about architecture
+We updated the sFNO+eps v2 to include layer LayerScale as mentioned in [@touvron2021going]
+
+If we remove LayerScale sFNO+eps v2 and sFNO+eps **long** v1 are equivalent. 
+
+> **Author(s):** Hugo Touvron, Matthieu Cord, Alexandre Sablayrolles, Gabriel Synnaeve, and Herve Jégou.
+
+> **Title:** Going Deeper with Image Transformers.
+
+> **Year:** 2021.
+
+> **Source:** arXiv preprint arXiv:2103.17239.
+
+## Generating the dataset 
+It is located in `dataset_time-harmonic-waves_hawen_parameters`
 
 
 

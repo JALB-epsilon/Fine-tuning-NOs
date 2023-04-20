@@ -1,12 +1,12 @@
 Project:
   name: 'FNO_residual'
-  database: 'GRF_12Hz'
+  database: 'GRF_15Hz'
   experiment: '25k'
 
 data:
   PATH: "databases"
   PDE_type: "acoustic"
-  process: 'GRF_12Hz'
+  process: 'GRF_15Hz'
   n_sample: 25000
   load_workers: 10
   frequency: 15
@@ -28,5 +28,5 @@ train:
 
 ckpt:
   PATH: "save_files"
-  save_dir: 'acoustic/GRF_12Hz/gelu/FNO_residual'
+  save_dir: 'acoustic/GRF_15Hz/gelu/FNO_residual'
   alias: 'FNO_residual'
