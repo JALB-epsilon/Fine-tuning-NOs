@@ -8,14 +8,22 @@ def to_numpy(x):
   return x.detach().cpu().numpy()
 
 #files Loader
-def MyLoader(GL, do = "train", config = None):
+def MyLoader(GL, do = "train", config = None, args=None):
   if config is not None: 
     batch_size  = config['train']['batchsize']
     workers = config['data']['load_workers']
     database = config['Project']['database']
     if database == 'GRF_7Hz': 
       size = 128
-    elif database == ('GRF_12Hz') or ('GRF_15Hz'): 
+    elif database in {'GRF_12Hz','GRF_15Hz'}: 
+      size = 64
+  elif args is not None:  
+    batch_size = args.batchsize
+    workers = args.load_workers
+    database = args.database
+    if database == 'GRF_7Hz': 
+      size = 128
+    elif database in {'GRF_12Hz', 'GRF_15Hz'}: 
       size = 64
   else: 
     batch_size = 50
@@ -63,9 +71,7 @@ class GettingLists(object):
     self.valid_limit = valid_limit
     if data_base == 'GRF_7Hz': 
       self.end = int(6) 
-    elif data_base == "BinaryBodies":
-      self.end = int(16)  
-    elif data_base == ("GRF_12Hz") or ("GRF_15Hz") :
+    elif data_base in {'GRF_12Hz', 'GRF_15Hz'} :
       self.end = int(10)
    
   def get_list(self, do):
@@ -117,6 +123,9 @@ class File_Loader(Dataset):
         elif self.data == ("GRF_12Hz") or ("GRF_15Hz") :
           self.data_memmaps = [np.load(path, mmap_mode='r').view(float) for path in data_paths]
           self.target_memmaps = [np.load(path, mmap_mode='r').view(float) for path in target_paths]
+        elif self.data == ("GRF_12Hz_vz") or ("GRF_15Hz_vz"):
+          self.data_memmaps = [np.load(path, mmap_mode='r').view(float) for path in data_paths]
+          self.target_memmaps = [np.load(path, mmap_mode='r').view(float).reshape(2,self.size,self.size,2) for path in target_paths]
   
         self.start_indices = [0] * len(data_paths)
         self.data_count = 0
@@ -137,4 +146,5 @@ class File_Loader(Dataset):
           return torch.tensor(data*1e-3, dtype=torch.float).view(self.size,self.size,1), torch.tensor(target, dtype=torch.float).view(self.size,self.size,1)
         elif self.data == ("GRF_12Hz") or ("GRF_15Hz"):
           return torch.tensor(data*1e-3, dtype=torch.float).view(self.size,self.size,1), torch.tensor(target, dtype=torch.float).view(self.size,self.size,2)
-
+        elif self.data == ("GRF_12Hz_vz") or ("GRF_15Hz_vz"):
+          return torch.tensor(data*1e-3, dtype=torch.float).view(self.size,self.size,1), torch.tensor(target, dtype=torch.float).view(2,self.size,self.size,2)

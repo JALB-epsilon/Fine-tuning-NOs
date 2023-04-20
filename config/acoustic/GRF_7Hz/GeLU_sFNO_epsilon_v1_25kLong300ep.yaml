@@ -1,0 +1,32 @@
+Project:
+  name: 'sFNO+epsilon_v1'
+  database: 'GRF_12Hz'
+  experiment: '25k'
+
+data:
+  PATH: "databases"
+  PDE_type: "acoustic"
+  process: 'GRF_12Hz'
+  n_sample: 25000
+  load_workers: 10
+  frequency: 7
+  
+model:
+  modes_list: [12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12]
+  features: 36
+  drop_path: 0.6
+  drop: 0.2
+  activ: "gelu"
+
+train:
+  batchsize: 50
+  epochs: 300
+  lr: 0.001
+  step_size: 70
+  gamma: 0.5
+  weight_decay: 0.00001
+
+ckpt:
+  PATH: "save_files"
+  save_dir: 'acoustic/GRF_12Hz/gelu/sFNO_epsilon_v1_long_300ep'
+  alias: 'sFNO_epsilon_v1_long_300ep'

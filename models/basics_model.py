@@ -113,7 +113,15 @@ class LayerNorm(nn.Module):
             x = (x - u) / torch.sqrt(s + self.eps)
             x = self.weight[:, None, None] * x + self.bias[:, None, None]
             return x
-
+###################################################################################### 
+# new additions over the main code            
+class GroupNorm(nn.GroupNorm):
+    """
+    Group Normalization with 1 group.
+    Input: tensor in shape [B, C, H, W]
+    """
+    def __init__(self, num_channels, **kwargs):
+        super().__init__(1, num_channels, **kwargs)
 
 ######################################################################################
 # Miscellaneous functions
@@ -135,6 +143,8 @@ def set_activ(activation):
         activation = activation.lower()
     if activation == 'relu':
         nonlinear = F.relu
+    elif activation == "leaky_relu": 
+        nonlinear = F.leaky_relu
     elif activation == 'tanh':
         nonlinear = F.tanh
     elif activation == 'sine':
@@ -148,3 +158,5 @@ def set_activ(activation):
     else:
         raise Exception('The activation is not recognized from the list')
     return nonlinear
+
+    
