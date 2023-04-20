@@ -2,9 +2,10 @@ import pytorch_lightning as pl
 import torch
 from torch import optim, nn
 from .FNO import fourier_conv_2d
-from .basics_model import LayerNorm, get_grid2D, FC_nn
+from .basics_model import LayerNorm, get_grid2D, FC_nn, set_activ
 import torch.nn.functional as F
 from utilities import LpLoss
+from timm.models.layers import DropPath
 
 #######################################
 # Integral Operator Layer
@@ -12,11 +13,12 @@ from utilities import LpLoss
 class IO_layer(nn.Module):
     def __init__(self,  features_, 
                         wavenumber, 
-                        drop = 0.):
+                        drop = 0., 
+                        activation = "relu"):
         super().__init__()
         self.W =  nn.Conv2d(features_, features_, 1)
         self.IO = fourier_conv_2d(features_, features_,*wavenumber)
-        self.act = nn.GELU()
+        self.act = set_activ(activation)
         self.dropout = nn.Dropout(drop)
 
     def forward(self, x):
@@ -25,32 +27,34 @@ class IO_layer(nn.Module):
         x = self.act(x)
         return x
 
-#######################################
-# Integral Operator Block
-#######################################
-class IO_Block(nn.Module):
+class FNO_residual_Block(nn.Module):
     def __init__(self, features_, 
                         wavenumber,
-                        drop = 0.):
+                        drop = 0., 
+                        drop_path= 0., 
+                        activation = "relu"):
         super().__init__()
-        self.IO = IO_layer(features_=features_, wavenumber=wavenumber, drop= drop )
-        self.pwconv1 = nn.Linear(features_, 4*features_) # pointwise/1x1 convs, implemented with linear layers
-        self.act = nn.GELU()
-        self.norm = nn.LayerNorm(features_, eps=1e-5)
-        self.pwconv2 = nn.Linear(4*features_, features_) #
+        self.IO = IO_layer(features_=features_,
+                            wavenumber=wavenumber, 
+                            drop= drop, 
+                            activation= activation)
+        self.act = set_activ(activation)
+        self.norm1 = LayerNorm(features_, eps=1e-5, data_format = "channels_first")
+        self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
+   
+   
     def forward(self, x):
-        x =(self.IO(x)).permute(0,2,3,1) #B C W H -> B W H C
-        x = self.pwconv1(x)
-        x = self.act(x)
-        x = self.pwconv2(x)
-        x  = self.norm(x)
-        x = x.permute(0, 3, 1, 2)
+        input = x
+        x = self.norm1(x)
+        x = self.IO(x)
+        x =input+self.drop_path(x) #NonLocal Layers
         return x
 
+
 #######################################
-# sFNO: Ensemble of the sFNO
+#  Ensemble of the sFNO_epsilon_v1
 #######################################
-class sFNO(pl.LightningModule):
+class FNO_residual(pl.LightningModule):
     def __init__(self,     
                     wavenumber, features_, 
                     padding = 9,
@@ -63,7 +67,9 @@ class sFNO(pl.LightningModule):
                     step_size= 100,
                     gamma= 0.5,
                     weight_decay= 1e-5,
-                    drop = 0.
+                    drop = 0.,
+                    drop_path= 0.,
+                    activation = "relu"
                     ):
         super().__init__()
     
@@ -99,14 +105,20 @@ class sFNO(pl.LightningModule):
                                     )
         else: 
             self.proj = proj
-        self.fno = []
-        for l in range(self.layers):
-            self.fno.append(IO_Block(features_ = features_, 
-                                        wavenumber=[wavenumber[l]]*2, 
-                                        drop= drop))
+        self.no = []
+
+        self.dp_rates = [x.item() for x in torch.linspace(0, drop_path, self.layers )]
         
 
-        self.fno =nn.Sequential(*self.fno)
+        for l in range(self.layers):
+            self.no.append(FNO_residual_Block(features_ = features_, 
+                                        wavenumber=[wavenumber[l]]*2, 
+                                        drop= drop,
+                                        drop_path= self.dp_rates[l], 
+                                        activation=activation))
+        
+
+        self.no =nn.Sequential(*self.no)
 
 
     def forward(self, x: torch.Tensor):
@@ -116,7 +128,7 @@ class sFNO(pl.LightningModule):
         x = self.lifting(x) 
         x = x.permute(0, 3, 1, 2) 
         x = F.pad(x, [0,self.padding, 0,self.padding]) 
-        x = self.fno(x)
+        x = self.no(x)
         x = x[..., :-self.padding, :-self.padding] 
         x = x.permute(0, 2, 3, 1 ) 
         x =self.proj(x)

@@ -2,7 +2,7 @@ import pytorch_lightning as pl
 import torch
 from torch import optim, nn
 from .FNO import fourier_conv_2d
-from .basics_model import LayerNorm, get_grid2D, FC_nn
+from .basics_model import LayerNorm, get_grid2D, FC_nn, set_activ
 import torch.nn.functional as F
 from utilities import LpLoss
 from timm.models.layers import DropPath
@@ -13,11 +13,12 @@ from timm.models.layers import DropPath
 class IO_layer(nn.Module):
     def __init__(self,  features_, 
                         wavenumber, 
-                        drop = 0.):
+                        drop = 0., 
+                        activation = "relu"):
         super().__init__()
         self.W =  nn.Conv2d(features_, features_, 1)
         self.IO = fourier_conv_2d(features_, features_,*wavenumber)
-        self.act = nn.GELU()
+        self.act = set_activ(activation)
         self.dropout = nn.Dropout(drop)
 
     def forward(self, x):
@@ -30,7 +31,8 @@ class MetaFormerNO_Block(nn.Module):
     def __init__(self, features_, 
                         wavenumber,
                         drop = 0., 
-                        drop_path= 0.):
+                        drop_path= 0., 
+                        activation = "relu"):
         super().__init__()
         self.IO = IO_layer(features_=features_,
                             wavenumber=wavenumber, 
@@ -38,7 +40,7 @@ class MetaFormerNO_Block(nn.Module):
         self.norm1 = LayerNorm(features_, eps=1e-5, data_format = "channels_first")
         self.norm2 = LayerNorm(features_, eps=1e-5, data_format = "channels_last")
         self.pwconv1 = nn.Linear(features_, 4*features_) # pointwise/1x1 convs, implemented with linear layers
-        self.act = nn.GELU()
+        self.act = set_activ(activation)
         self.pwconv2 = nn.Linear(4*features_, features_) 
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
    
@@ -76,7 +78,8 @@ class sFNO_epsilon_v1(pl.LightningModule):
                     gamma= 0.5,
                     weight_decay= 1e-5,
                     drop = 0.,
-                    drop_path= 0.
+                    drop_path= 0.,
+                    activation = "relu"
                     ):
         super().__init__()
     
@@ -113,11 +116,16 @@ class sFNO_epsilon_v1(pl.LightningModule):
         else: 
             self.proj = proj
         self.no = []
+
+        self.dp_rates = [x.item() for x in torch.linspace(0, drop_path, self.layers )]
+        
+
         for l in range(self.layers):
             self.no.append(MetaFormerNO_Block(features_ = features_, 
                                         wavenumber=[wavenumber[l]]*2, 
                                         drop= drop,
-                                        drop_path= drop_path))
+                                        drop_path= self.dp_rates[l], 
+                                        activation=activation))
         
 
         self.no =nn.Sequential(*self.no)
@@ -154,14 +162,14 @@ class sFNO_epsilon_v1(pl.LightningModule):
         self.log('val_loss', val_loss, on_epoch=True, prog_bar=True, logger=True)     
         return val_loss
 
-    def configure_optimizers(self):
-        optimizer = optim.Adam(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
-        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=self.step_size, gamma=self.gamma)
+    def configure_optimizers(self, optimizer=None, scheduler=None):
+        if optimizer is None:
+            optimizer = optim.AdamW(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
+        if  scheduler is None:
+            scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=self.step_size, gamma=self.gamma)
         return {
         "optimizer": optimizer,
         "lr_scheduler": {
             "scheduler": scheduler
         },
     }
-
-

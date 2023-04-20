@@ -264,9 +264,11 @@ class sFNO_epsilon_v2_proj(pl.LightningModule):
         return val_loss
 
 
-    def configure_optimizers(self):
-        optimizer = optim.AdamW(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
-        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=self.step_size, gamma=self.gamma)
+    def configure_optimizers(self, optimizer=None, scheduler=None):
+        if optimizer is None:
+            optimizer = optim.AdamW(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
+        if  scheduler is None:
+            scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=self.step_size, gamma=self.gamma)
         return {
         "optimizer": optimizer,
         "lr_scheduler": {
