@@ -1,5 +1,5 @@
 Project:
-  name: 'sFNO'
+  name: 'sFNO+epsilon_v2_updated'
   database: 'GRF_7Hz'
   experiment: '25k'
 
@@ -9,12 +9,16 @@ data:
   process: 'GRF_7Hz'
   n_sample: 25000
   load_workers: 10
+  frequency: 12
   
 model:
-  modes_list: [12,12,12,12]
-  features: 36
+  modes_list: [12, 12, 12, 12]
+  depths: [3, 3, 9, 3]
+  dims: [36, 36, 36, 36]
+  drop_path: 0.3
   drop: 0.
-
+  activ: "gelu"
+  
 train:
   batchsize: 50
   epochs: 100
@@ -25,5 +29,5 @@ train:
 
 ckpt:
   PATH: "save_files"
-  save_dir: 'acoustic/GRF_7Hz/sFNO'
-  alias: 'sFNO'
+  save_dir: 'acoustic/GRF_7Hz/gelu/sFNO_epsilon_v2_updated'
+  alias: 'sFNO_epsilon_v2_updated'
