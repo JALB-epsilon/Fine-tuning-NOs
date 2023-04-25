@@ -63,12 +63,11 @@ def main(args, config = None):
         if args.erase == True:
             shutil.rmtree(save_file)
 
-
     if args.checkpoint is None:
         #left the default values provided by the config file
         train_dataloader, val_dataloader = datasetFactory(config=config, do=args.do, args=None)
         max_epochs = config["train"]["epochs"]
-    if args.checkpoint is not None:
+    elif args.checkpoint is not None:
         print(f"Load from checkpoint {args.checkpoint}")  
         model=model.load_from_checkpoint(args.checkpoint)
         #change optimizer if needed
@@ -115,7 +114,8 @@ def main(args, config = None):
     if args.usual_ckpt == True:
         trainer = pl.Trainer(max_epochs=max_epochs,
                     accelerator=args.accelerator, 
-                    devices=args.devices) 
+                    devices=args.devices,
+                    default_root_dir=save_file) 
 
     elif args.usual_ckpt == False:
         trainer = pl.Trainer(max_epochs=max_epochs,
