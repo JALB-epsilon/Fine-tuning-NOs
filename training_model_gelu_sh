@@ -1,0 +1,10 @@
+#!/bin/bash
+list=$(ls config/acoustic/GRF_15Hz/GeLU*.yaml)
+for c in $list
+do
+    for ((i=0; i<3; i++))
+    do
+        CUDA_VISIBLE_DEVICES=1 python3 main.py -c $c -u_ckpt True
+    done
+done
+

@@ -36,11 +36,12 @@ class MetaFormerNO_Block(nn.Module):
         super().__init__()
         self.IO = IO_layer(features_=features_,
                             wavenumber=wavenumber, 
-                            drop= drop)
+                            drop= drop, 
+                            activation = "relu")
         self.norm1 = LayerNorm(features_, eps=1e-5, data_format = "channels_first")
         self.norm2 = LayerNorm(features_, eps=1e-5, data_format = "channels_last")
         self.pwconv1 = nn.Linear(features_, 4*features_) # pointwise/1x1 convs, implemented with linear layers
-        self.act = set_activ(activation)
+        self.act = set_activ(activation) if activation is not None else set_activ("gelu")
         self.pwconv2 = nn.Linear(4*features_, features_) 
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
    
@@ -162,11 +163,9 @@ class sFNO_epsilon_v1(pl.LightningModule):
         self.log('val_loss', val_loss, on_epoch=True, prog_bar=True, logger=True)     
         return val_loss
 
-    def configure_optimizers(self, optimizer=None, scheduler=None):
-        if optimizer is None:
-            optimizer = optim.AdamW(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
-        if  scheduler is None:
-            scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=self.step_size, gamma=self.gamma)
+    def configure_optimizers(self):
+        optimizer = optim.Adam(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
+        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=self.step_size, gamma=self.gamma)
         return {
         "optimizer": optimizer,
         "lr_scheduler": {

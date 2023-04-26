@@ -40,7 +40,6 @@ class Mlp(nn.Module):
 
 #######################################
 # Transformer look-alike block with Neural Operators
-#Adding layer scale
 #######################################
 class NOFormerBlock(nn.Module):
     def __init__(self, features_, 
@@ -55,10 +54,11 @@ class NOFormerBlock(nn.Module):
         super().__init__()
         self.IO = IO_layer(features_=features_,
                             wavenumber=wavenumber, 
-                            drop= drop)
+                            drop= drop, 
+                            activation = activation)
         self.norm1 = norm_layer(features_)
         self.norm2 = norm_layer(features_)
-        self.act = set_activ(activation)
+        self.act = set_activ(activation) if activation is not None else set_activ("gelu")
         mlp_hidden_features = int(features_ * mlp_ratio)
         self.mlp = Mlp(in_features=features_, 
                         hidden_features=mlp_hidden_features, 
@@ -260,3 +260,17 @@ class sFNO_epsilon_v2_updated(pl.LightningModule):
         },
     }
 
+
+
+class Pooling(nn.Module):
+    """
+    Implementation of pooling for PoolFormer
+    --pool_size: pooling size
+    """
+    def __init__(self, pool_size=3):
+        super().__init__()
+        self.pool = nn.AvgPool2d(
+            pool_size, stride=1, padding=pool_size//2, count_include_pad=False)
+
+    def forward(self, x):
+        return self.pool(x) - x
