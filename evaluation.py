@@ -65,7 +65,11 @@ if __name__ == '__main__':
     config_file = args.config_file
     with open(config_file, 'r') as stream:
         config = yaml.load(stream, yaml.FullLoader)
-    database= config["data"]["process"]
+    if config["model"]["activ"] is None:
+        activ = "Identity"
+    else: 
+        activ = config["model"]["activ"]
+    database= activ+"_"+config["data"]["process"]
     name= config["ckpt"]["alias"]
     if args.checkpoint is None:
         c_save = config["ckpt"]
@@ -86,3 +90,4 @@ if __name__ == '__main__':
         list_test= test(config,args=args)
         print(list_test)
         saving_files([list_test], database=database, name =name)
+
