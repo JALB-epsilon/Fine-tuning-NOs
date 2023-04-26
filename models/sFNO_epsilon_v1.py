@@ -37,7 +37,7 @@ class MetaFormerNO_Block(nn.Module):
         self.IO = IO_layer(features_=features_,
                             wavenumber=wavenumber, 
                             drop= drop, 
-                            activation = "relu")
+                            activation = activation)
         self.norm1 = LayerNorm(features_, eps=1e-5, data_format = "channels_first")
         self.norm2 = LayerNorm(features_, eps=1e-5, data_format = "channels_last")
         self.pwconv1 = nn.Linear(features_, 4*features_) # pointwise/1x1 convs, implemented with linear layers
