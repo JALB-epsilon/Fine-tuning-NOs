@@ -67,25 +67,38 @@ def main(args, config = None):
         #left the default values provided by the config file
         train_dataloader, val_dataloader = datasetFactory(config=config, do=args.do, args=None)
         max_epochs = config["train"]["epochs"]
+
+        
     elif args.checkpoint is not None:
         print(f"Load from checkpoint {args.checkpoint}")  
-        model=model.load_from_checkpoint(args.checkpoint)
+        #model=model.load_from_checkpoint(args.checkpoint)
+        checkpoint = torch.load(args.checkpoint, map_location=lambda storage, loc: storage)
+        print(checkpoint.keys())
+        model.load_state_dict(checkpoint["state_dict"])
+        print(model.learning_rate)
         #change optimizer if needed
+
+        if args.lr is None:
+            args.lr = config["train"]["lr"]
+                    
+        if args.weight_decay is None:
+            args.weight_decay = config["train"]["weight_decay"]
+
         if args.optimizer is not None:
             if args.optimizer == "SGD":
                 optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=0.9)
             elif args.optimizer == "Adam":
-                optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+                optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
         else:
-            if args.weight_decay is None:
-                args.weight_decay = config["train"]["weight_decay"]
             optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+
         #change the scheduler if needed
         if args.scheduler is not None:
             if args.scheduler == "ReduceLROnPlateau":
                 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10, verbose=True, eps=1e-08, min_lr=0)
             elif args.scheduler == "CosineAnnealingLR":
                 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=10, eta_min=0, last_epoch=-1)
+        
         else:
             if args.step_size is None:
                 args.step_size = config["train"]["step_size"]
@@ -97,6 +110,9 @@ def main(args, config = None):
         if args.epochs is not None:
             print(f"Change the number of epochs to {args.epochs}")
             max_epochs = args.epochs
+        else:
+            max_epochs = config["train"]["epochs"]
+            print(checkpoint["epoch"])
             
         #change the filename if needed
         if args.filename is not None:
@@ -110,7 +126,8 @@ def main(args, config = None):
             args.PATH = os.path.join('save_files', 'acoustic', args.data_base)
         #change the config file if needed through the command line
         train_dataloader, val_dataloader = datasetFactory(config=config, do = args.do, args=args)
-        
+      
+       
     if args.usual_ckpt == True:
         trainer = pl.Trainer(max_epochs=max_epochs,
                     accelerator=args.accelerator, 
@@ -122,8 +139,12 @@ def main(args, config = None):
                             accelerator=args.accelerator, 
                             devices=args.devices,
                             callbacks=[checkpoint_callback]) 
+        
+    if args.resume == True: 
+        trainer.fit(model, train_dataloader, val_dataloader, ckpt_path=args.checkpoint)
 
-    trainer.fit(model, train_dataloader, val_dataloader)
+    else:
+        trainer.fit(model, train_dataloader, val_dataloader)
 
 
 
@@ -146,6 +167,9 @@ if __name__ == '__main__':
     parser.add_argument( '-ckpt', '--checkpoint', type = str, 
                                 help='checkpoint file to load',    
                                 default=None)
+    parser.add_argument('-r', '--resume', type = bool,
+                                help='resume training',
+                                default=False)
     parser.add_argument('-savetop', '--save_top_k', type = int, 
                                 help='save top k ckpt',
                                 default=3)

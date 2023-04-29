@@ -259,18 +259,3 @@ class sFNO_epsilon_v2_updated(pl.LightningModule):
             "scheduler": scheduler
         },
     }
-
-
-
-class Pooling(nn.Module):
-    """
-    Implementation of pooling for PoolFormer
-    --pool_size: pooling size
-    """
-    def __init__(self, pool_size=3):
-        super().__init__()
-        self.pool = nn.AvgPool2d(
-            pool_size, stride=1, padding=pool_size//2, count_include_pad=False)
-
-    def forward(self, x):
-        return self.pool(x) - x
