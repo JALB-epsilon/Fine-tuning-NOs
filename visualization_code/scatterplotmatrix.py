@@ -1,4 +1,5 @@
 from matplotlib import pyplot as plt
+import matplotlib.cm as cm
 
 import itertools
 import numpy as np
@@ -13,7 +14,7 @@ def depth(data):
         print(f'unable to determine depth of {data}')
         return 0
 
-def scatterplot_matrix(data, names, colors=None, labels=None, markers=None, **kwargs):
+def scatterplot_matrix(data, names, stride=1, colorby='id', **kwargs):
     """Plots a scatterplot matrix of subplots.  Each row of "data" is plotted
     against other rows, resulting in a nrows by nrows grid of subplots with the
     diagonal subplots labeled with "names".  Additional keyword arguments are
@@ -25,6 +26,8 @@ def scatterplot_matrix(data, names, colors=None, labels=None, markers=None, **kw
         print('single curve in input')
         numvars, numdata = data.shape
         data = np.array([data])
+        print('data is now {}'.format(data))
+        print('data shape is {}'.format(data.shape))
     elif len(data.shape) == 3:
         print(f'several curves in input ({data.shape[0]})')
         numvars, numdata = data[0].shape
@@ -52,12 +55,36 @@ def scatterplot_matrix(data, names, colors=None, labels=None, markers=None, **kw
         ax.label_outer()
 
     # Plot the data.
+    save_kwargs = kwargs
+    if 'marker' in save_kwargs.keys():
+        marker = save_kwargs['marker']
+    else:
+        marker = 'none'
+    if colorby == 'rank':
+        save_kwargs['marker'] = 'none'
+    ncurves = data.shape[0]
+    print(f'there are {ncurves} curves in input')
     for i, j in zip(*np.triu_indices_from(axes, k=1)):
-        for curve_id in range(data.shape[0]):
+        for curve_id in range(ncurves):
             cdata = data[curve_id]
+            if stride > 1:
+                subcdata = cdata[:,::stride]
+            else:
+                subcdata = cdata.view()
+            print('cdata={}'.format(cdata))
             for x, y in [(i,j), (j,i)]:
-                if colors is not None:
-                    axes[x,y].plot(cdata[x], cdata[y], c=colors[curve_id], marker=markers[curve_id], **kwargs)
+                for k in save_kwargs.keys():
+                    if isinstance(save_kwargs[k], list):
+                        if len(save_kwargs[k]) == ncurves:
+                            kwargs[k] = save_kwargs[k][curve_id]
+                        else:
+                            print(f'length(kwargs[{k}]) != number of curves {ncurves}')
+                            kwargs[k] = save_kwargs[k][0]
+                axes[x,y].plot(cdata[x], cdata[y], **kwargs)
+                if colorby == 'rank':
+                    colors = cm.viridis(np.linspace(0, 1, len(subcdata[0])))
+                    print(f'plotting scatter points:\ncolors={colors}\nx={subcdata[x]}\ny={subcdata[y]}')
+                    axes[x,y].scatter(subcdata[x], subcdata[y], color=colors)
 
     # Label the diagonal subplots...
     for i, label in enumerate(names):
@@ -74,8 +101,10 @@ def scatterplot_matrix(data, names, colors=None, labels=None, markers=None, **kw
 if __name__ == '__main__':
     np.random.seed(1977)
     numvars, numdata = 4, 10
-    data = 10 * np.random.random((numvars, numdata))
+    data = np.random.random((numvars, numdata))
+    print('data={}'.format(data))
     fig = scatterplot_matrix(data, ['mpg', 'disp', 'drat', 'wt'],
-            linestyle='none', marker='o', color='black', mfc='none')
+            linestyle='none', marker='o',
+            markerfacecolor=(1,0,0), markeredgewidth=.1, markeredgecolor='black')
     fig.suptitle('Simple Scatterplot Matrix')
     plt.show()

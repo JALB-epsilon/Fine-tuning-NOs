@@ -6,7 +6,7 @@ import combine_files
 
 '''
 Convenience program that allows to run the entire surface construction and
-visualization pipeline, tarting with a set of randomly organized loss samples
+visualization pipeline, starting with a set of randomly organized loss samples
 stored in csv files and pre-computed learning trajectory projection and first
 two principal components
 '''

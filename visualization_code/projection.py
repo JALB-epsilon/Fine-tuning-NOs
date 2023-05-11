@@ -12,7 +12,7 @@ import random
 
 from projection_helper import sizeof, shapeof
 
-sys.path.append('/Users/xmt/code/github/loss-landscape')
+sys.path.append('/Users/xmt/code/github/loss_landscape')
 import net_plotter
 import h5_util
 import tqdm
@@ -230,7 +230,7 @@ def load_all_directions(dir_file):
     print(f'directions contain {len(directions)} vectors')
     return directions
 
-def project_trajectory(args, w, s, callback):
+def project_trajectory(args, w, s, callback, model_name=None):
     """
         Project the optimization trajectory onto the given two directions.
 
@@ -248,7 +248,9 @@ def project_trajectory(args, w, s, callback):
         Returns:
           proj_file: the projection filename
     """
-    proj_file = args.dir_file + '_proj_' + args.proj_method + '.h5'
+    if model_name is not None:
+        proj_file = args.dir_file + '_' + model_name
+    proj_file += '_proj_' + args.proj_method + '.h5'
     if os.path.exists(proj_file):
         replace = input('The projection file exists! Replace?')
         if replace:
@@ -435,7 +437,7 @@ def transform_tensors(t, what, verbose=False):
         return transform_tensor(t, what, verbose)
 
 
-def setup_PCA_directions(args, callback, w, s, verbose=False):
+def setup_PCA_directions(args, callback, w, s, verbose=False, filename=None):
     """
         Find PCA directions for the optimization path from the initial model
         to the final trained model.
@@ -460,7 +462,11 @@ def setup_PCA_directions(args, callback, w, s, verbose=False):
     folder_name += '_complex=' + str(args.complex)
     folder_name += '_dim=' + str(args.dimension)
     os.system('mkdir ' + folder_name)
-    dir_name = os.path.join(folder_name, 'directions.h5')
+    if filename is not None:
+        prefix = filename + '_'
+    else:
+        prefix = ''
+    dir_name = os.path.join(folder_name, prefix + 'directions.h5')
     if verbose:
         print(f'PCA directions computed from learning path will be stored in {dir_name}')
 
@@ -495,7 +501,7 @@ def setup_PCA_directions(args, callback, w, s, verbose=False):
             s2 = net2.state_dict()
             d = net_plotter.get_diff_states(s, s2)
         if args.ignore == 'biasbn':
-        	net_plotter.ignore_biasbn(d)
+            net_plotter.ignore_biasbn(d)
         d = tensorlist_to_tensor(d)
         if verbose:
             print('converting that tensor into {}'.format(shapeof(d)))

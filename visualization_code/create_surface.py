@@ -8,7 +8,7 @@
 
     Github: https://github.com/tomgoldstein/loss-landscape
 
-    Given PCA directions, the code samples the loss associeted with models
+    Given PCA directions, the code samples the loss associated with models
     whose weights lie in the corresponding two-dimensional weight
     parameterization plane.
 """
@@ -22,21 +22,22 @@ import argparse
 import sys
 import json
 import csv
-
-# import Tom Goldstein's loss-landscape library
-from loss_landscape import plot_2D, plot_1D, net_plotter, mpi4pytorch,
-    scheduler, create_trajectory
-
-sys.path.append('../')
-
-from main import choosing_model, datasetFactory
 import yaml
+
+
+
+from projection import setup_PCA_directions, project_trajectory, tensorlist_to_tensor
+from scatterplotmatrix import scatterplot_matrix as splom
+sys.path.append('../')
 import utilities
+from main import datasetFactory
 
-from projection import setup_PCA_directions, project_trajectory
-from projection_helper import get_loader
+sys.path.append('../../')
+sys.path.append('../../loss_landscape')
+import loss_landscape
+from loss_landscape import net_plotter, plot_2D, h5_util
 
-from create_trajectory import evaluate
+from create_multi_trajectories import evaluate
 
 import plot_2D
 import time
@@ -51,7 +52,7 @@ import dataloader
 import evaluation
 import projection as proj
 from projection import shapeof, sizeof
-import plotter_helper as plotter
+# import plotter_helper as plotter
 import plot_2D
 import plot_1D
 import model_loader
@@ -162,7 +163,7 @@ def crunch(surf_file, net, w, s, d, loss_key, comm, rank, args, samples, loss_fu
             writer = csv.DictWriter(csvfile, fieldnames=['x', 'y', 'loss', 'time'])
             writer.writerow({'x': c[0], 'y': c[1], 'loss': loss, 'time': loss_compute_time})
     total_time = time.time() - start_time
-    print('Rank %d done!  Total time: %.2f' % (rank, total_time)
+    print(f'Rank {rank} done!  Total time: {total_time}')
 
 ###############################################################
 #                          MAIN
@@ -268,11 +269,11 @@ if __name__ == '__main__':
         config = yaml.load(stream, yaml.FullLoader)
     c_save = config["ckpt"]
     args.path = os.path.join(args.path, config['ckpt']['save_dir'])
-    model = choosing_model(config)
+    model = utilities.choosing_model(config)
     if args.testing:
-        dataloader = get_loader(config, train=False, prefix='../')
+        dataloader = datasetFactory(config, do = "test", args=None)
     else:
-        dataloader, _ = get_loader(config, train=True, prefix='../')
+        dataloader = datasetFactory(config, do = "train", args=None)
     myloss = utilities.LpLoss(size_average=False)
 
     #--------------------------------------------------------------------------
