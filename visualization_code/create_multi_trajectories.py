@@ -76,15 +76,22 @@ def distance(model1, model2, verbose=False, norm='l2'):
     return dist
 
 
-def evaluate(model, dataloader, loss, train=False, cuda=False, verbose=False):
+def evaluate(model, dataloader, loss, train=False, cuda=False, verbose=False, rank=0):
     the_loss = 0.
+    print(f'dataloader={dataloader}')
     if train:
         lossname = 'training'
     else:
         lossname = 'testing'
     with torch.no_grad():
-        pbar = tqdm.tqdm(dataloader, ncols=100, desc=f'Computing {lossname} loss')
+        '''
+        pbar = tqdm.tqdm(dataloader, ncols=100, desc=f'Computing {lossname} loss (rank={rank})')
+        print(f'pbar[0]={type(list(pbar)[0])}')
         for x, y in pbar:
+        '''
+        for stuff in dataloader:
+            print(f'len(stuff)={len(stuff)}')
+            print('stuff contains: {}'.format([type(a) for a in stuff]))
             batch_size, s= x.shape[0:2]
             if cuda:
                 x, y = x.cuda(), y.cuda()
