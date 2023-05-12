@@ -83,8 +83,9 @@ def evaluate(model, dataloader, loss, train=False, cuda=False, verbose=False):
     else:
         lossname = 'testing'
     with torch.no_grad():
-        pbar = tqdm.tqdm(dataloader, ncols=100, desc=f'Computing {lossname} loss')
-        for x, y in pbar:
+        # pbar = tqdm.tqdm(dataloader, ncols=100, desc=f'Computing {lossname} loss')
+        # for x, y in pbar:
+        for x, y in dataloader:
             batch_size, s= x.shape[0:2]
             if cuda:
                 x, y = x.cuda(), y.cuda()
