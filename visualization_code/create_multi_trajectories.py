@@ -76,8 +76,9 @@ def distance(model1, model2, verbose=False, norm='l2'):
     return dist
 
 
-def evaluate(model, dataloader, loss, train=False, cuda=False, verbose=False):
+def evaluate(model, dataloader, loss, train=False, cuda=False, verbose=False, rank=0):
     the_loss = 0.
+    print(f'dataloader={dataloader}')
     if train:
         lossname = 'training'
     else:

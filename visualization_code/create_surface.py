@@ -80,6 +80,22 @@ def name_surface_file(args, dir_file):
 
     return surf_file + ".h5"
 
+def load_these_directions(dir_file, dir_names):
+    """ Load direction(s) from the direction file."""
+
+    print('This direction loader can import more than 2 dimensions')
+
+    directions = []
+    f = h5py.File(dir_file, 'r')
+    for name in dir_names:
+        if name in f.keys():
+            directions.append(h5_util.read_list(f, name))
+        else:
+            break
+
+    print(f'directions contain {len(directions)} vectors')
+    return directions
+
 
 def setup_surface_file(args, surf_file, dir_file):
     print('-------------------------------------------------------------------')
@@ -151,9 +167,9 @@ def crunch(surf_file, net, w, s, d, loss_key, comm, rank, args, samples, loss_fu
 
         # Load the weights corresponding to those coordinates into the net
         if args.dir_type == 'weights':
-            plotter.set_weights(net.module if args.ngpu > 1 else net, w, d, c)
+            net_plotter.set_weights(net.module if args.ngpu > 1 else net, w, d, c)
         elif args.dir_type == 'states':
-            plotter.set_states(net.module if args.ngpu > 1 else net, s, d, c)
+            net_plotter.set_states(net.module if args.ngpu > 1 else net, s, d, c)
 
         # Record the time to compute the loss value
         loss_start = time.time()
@@ -287,7 +303,7 @@ if __name__ == '__main__':
         model.cuda()
     model.eval()
 
-    w = plotter.get_weights(model) # initial parameters
+    w = net_plotter.get_weights(model) # initial parameters
     s = copy.deepcopy(model.state_dict()) # deepcopy since state_dict are references
     if args.cuda and args.ngpu > 1:
         # data parallel with multiple GPUs on a single node
@@ -350,7 +366,7 @@ if __name__ == '__main__':
     #mpi.barrier(comm)
 
     # load directions
-    directions = plotter.load_directions(dir_file)
+    directions = load_these_directions(dir_file, ['direction_0', 'direction_1'])
     print(f'type(directions) is {type(directions)}')
     print(f'type(directions[0]) is {type(directions[0])}')
     print(f'type(directions[0][0]) is {type(directions[0][0])}')
