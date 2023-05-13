@@ -24,9 +24,7 @@ import json
 import csv
 import yaml
 
-
-
-from projection import setup_PCA_directions, project_trajectory, tensorlist_to_tensor
+from projection import setup_PCA_directions, project_trajectory, tensorlist_to_tensor, pca_coords_to_weights
 from scatterplotmatrix import scatterplot_matrix as splom
 sys.path.append('../')
 import utilities
@@ -167,7 +165,8 @@ def crunch(surf_file, net, w, s, d, loss_key, comm, rank, args, samples, loss_fu
 
         # Load the weights corresponding to those coordinates into the net
         if args.dir_type == 'weights':
-            net_plotter.set_weights(net.module if args.ngpu > 1 else net, w, d, c)
+            #net_plotter.set_weights(net.module if args.ngpu > 1 else net, w, d, c)
+            net = pca_coords_to_weights(c, d, w, what='split') # what = how to handle complex coefficients
         elif args.dir_type == 'states':
             net_plotter.set_states(net.module if args.ngpu > 1 else net, s, d, c)
 
@@ -289,7 +288,7 @@ if __name__ == '__main__':
     if args.testing:
         dataloader = datasetFactory(config, do = "test", args=None)
     else:
-        dataloader = datasetFactory(config, do = "train", args=None)
+        dataloader, _ = datasetFactory(config, do = "train", args=None)
     myloss = utilities.LpLoss(size_average=False)
 
     #--------------------------------------------------------------------------
