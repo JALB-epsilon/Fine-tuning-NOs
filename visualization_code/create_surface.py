@@ -131,6 +131,33 @@ def to_path(checkpath, config):
 def to_filename(checkpath, config, filename):
     return os.path.join(to_path(checkpath, config), filename)
 
+def my_set_weights(net, weights, directions=None, step=None):
+    """
+        Overwrite the network's weights with a specified list of tensors
+        or change weights along directions with a step size.
+    """
+    if directions is None:
+        # You cannot specify a step length without a direction.
+        for (p, w) in zip(net.parameters(), weights):
+            p.data.copy_(w.type(type(p.data)))
+    else:
+        assert step is not None, 'If a direction is specified then step must be specified as well'
+
+        if len(directions) == 2:
+            dx = directions[0]
+            dy = directions[1]
+            changes = [d0*step[0] + d1*step[1] for (d0, d1) in zip(dx, dy)]
+        else:
+            changes = [d*step for d in directions[0]]
+
+        for (p, w, d) in zip(net.parameters(), weights, changes):
+            # print(f'w=\n{w}')
+            # print(f'd=\n{d}')
+            print(f'type(w)={type(w)}, w.dtype={w.dtype}, type(d)={type(d)}, d.type={d.dtype}')
+            # p.data = w + torch.Tensor(d, dtype=w.dtype) #.type(type(w))
+            p.data = w + d
+
+
 def crunch(surf_file, net, w, s, d, loss_key, comm, rank, args, samples, loss_func):
     """
         Calculate the loss values of modified models in parallel
@@ -165,8 +192,8 @@ def crunch(surf_file, net, w, s, d, loss_key, comm, rank, args, samples, loss_fu
 
         # Load the weights corresponding to those coordinates into the net
         if args.dir_type == 'weights':
-            #net_plotter.set_weights(net.module if args.ngpu > 1 else net, w, d, c)
-            net = pca_coords_to_weights(c, d, w, what='split') # what = how to handle complex coefficients
+            my_set_weights(net.module if args.ngpu > 1 else net, w, d, c)
+            #net = pca_coords_to_weights(c, d, w, what='split') # what = how to handle complex coefficients
         elif args.dir_type == 'states':
             net_plotter.set_states(net.module if args.ngpu > 1 else net, s, d, c)
 
@@ -375,18 +402,19 @@ if __name__ == '__main__':
         print('cosine similarity between x-axis and y-axis: %f' % similarity)
 
     class loss_callback:
-        def __init__(self, dataset, loss, train, cuda):
+        def __init__(self, dataset, loss, train, cuda, is_complex=False):
             self.dataset = dataset
             self.loss = loss
             self.train = train
             self.cuda = cuda
+            self.is_complex = is_complex
         def __call__(self, model, rank=0, verbose=False):
-            return evaluate(model, self.dataset, self.loss, train=self.train, verbose=verbose, cuda=self.cuda, rank=rank)
+            return evaluate(model, self.dataset, self.loss, train=self.train, verbose=verbose, cuda=self.cuda, rank=rank, is_complex=self.is_complex)
 
     #--------------------------------------------------------------------------
     # Start the computation
     #--------------------------------------------------------------------------
-    crunch(surf_file, model, w, s, directions, loss_label, comm, rank, args, samples, loss_func=loss_callback(dataloader, myloss, not args.testing, args.cuda))
+    crunch(surf_file, model, w, s, directions, loss_label, comm, rank, args, samples, loss_func=loss_callback(dataloader, myloss, not args.testing, args.cuda, True))
 
     #--------------------------------------------------------------------------
     # Plot figures

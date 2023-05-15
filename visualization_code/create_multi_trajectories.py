@@ -76,7 +76,7 @@ def distance(model1, model2, verbose=False, norm='l2'):
     return dist
 
 
-def evaluate(model, dataloader, loss, train=False, cuda=False, verbose=False, rank=0):
+def evaluate(model, dataloader, loss, train=False, cuda=False, verbose=False, rank=0, is_complex=False):
     the_loss = 0.
     print(f'dataloader={dataloader}')
     if train:
@@ -84,18 +84,22 @@ def evaluate(model, dataloader, loss, train=False, cuda=False, verbose=False, ra
     else:
         lossname = 'testing'
     with torch.no_grad():
-        # pbar = tqdm.tqdm(dataloader, ncols=100, desc=f'Computing {lossname} loss')
-        # for x, y in pbar:
-        for x, y in dataloader:
+        pbar = tqdm.tqdm(dataloader, ncols=100, desc=f'Computing {lossname} loss')
+        for x, y in pbar:
+            #for x, y in dataloader:
             batch_size, s= x.shape[0:2]
             if cuda:
                 x, y = x.cuda(), y.cuda()
-            out = model(x).reshape(batch_size, s, s)
+            # print(f'model(x)={model(x)}')
+            if is_complex:
+                out = model(x).reshape(batch_size, s, s, 2)
+            else:
+                out = model(x).reshape(batch_size, s, s)
             loss_test = loss(out.view(batch_size,-1), y.view(batch_size,-1))
             the_loss += loss_test.item()
 
     the_loss = the_loss / len(dataloader.dataset)
-    if verbose:
+    if True or verbose:
         print(f'loss = {the_loss}')
     return the_loss, 0
 
