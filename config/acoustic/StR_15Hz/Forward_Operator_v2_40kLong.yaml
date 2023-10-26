@@ -1,0 +1,36 @@
+Project:
+  name: 'Forward_Operator_v2'
+  database: 'StR_15Hz'
+  experiment: '40k'
+
+data:
+  PATH: "databases"
+  PDE_type: "acoustic"
+  process: 'StR_15Hz'
+  n_sample: 40000
+  load_workers: 10
+  frequency: 15
+  
+model:
+  dim_src_position: 1
+  numb_rcv: 128  
+  modes_list: [12, 12, 12, 12]
+  depths: [3, 3, 12, 3]
+  dims: [36, 36, 36, 36]
+  drop_path: 0.6
+  drop: 0.1
+  activ: "leaky_relu"
+  with_bias: False
+  
+train:
+  batchsize: 20
+  epochs: 400
+  lr: 0.001
+  step_size: 100
+  gamma: 0.5
+  weight_decay: 0.00001
+
+ckpt:
+  PATH: "save_files"
+  save_dir: 'acoustic/StR_15Hz/leaky_relu/Forward_Operator_v2_40k_long'
+  alias: 'Forward_Operator_v2_long'
