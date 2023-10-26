@@ -166,4 +166,60 @@ def choosing_model(config):
                 weight_decay= c_train["weight_decay"],
                 )
 
+        elif config["Project"]["database"]=='StR_15Hz':
+            if config["Project"]["name"] == "Forward_Operator":
+                model =Forward_Operator( 
+                        dim_src_position = c_nn["dim_src_position"],
+                        numb_rcv= c_nn["numb_rcv"],                
+                        stage_list = c_nn["depths"], 
+                        features_stage_list = c_nn["dims"],
+                        wavenumber_stage_list = c_nn["modes_list"],
+                        dim_input = 1,
+                        dim_output = 2,                
+                        activation = c_nn["activ"],
+                        drop = c_nn["drop"], 
+                        drop_path_rate = c_nn["drop_path"],               
+                        learning_rate = c_train["lr"], 
+                        step_size= c_train["step_size"],
+                        gamma= c_train["gamma"],
+                        weight_decay= c_train["weight_decay"]
+                        )
+            elif config["Project"]["name"] == "Forward_Operator_v2":
+                    model =Forward_Operator_v2( 
+                        dim_src_position = c_nn["dim_src_position"],
+                        numb_rcv= c_nn["numb_rcv"],                
+                        stage_list = c_nn["depths"], 
+                        features_stage_list = c_nn["dims"],
+                        wavenumber_stage_list = c_nn["modes_list"],
+                        dim_input = 1,
+                        dim_output = 2,                
+                        activation = c_nn["activ"],
+                        drop = c_nn["drop"], 
+                        with_bias= c_nn["with_bias"],
+                        drop_path_rate = c_nn["drop_path"],               
+                        learning_rate = c_train["lr"], 
+                        step_size= c_train["step_size"],
+                        gamma= c_train["gamma"],
+                        weight_decay= c_train["weight_decay"]
+                        
+                        )
+            elif config["Project"]["name"] == "Forward_Operator_v3":
+                    model =Forward_Operator_v3( 
+                        dim_src_position = c_nn["dim_src_position"],
+                        numb_rcv= c_nn["numb_rcv"],                
+                        stage_list = c_nn["depths"], 
+                        features_stage_list = c_nn["dims"],
+                        wavenumber_stage_list = c_nn["modes_list"],
+                        dim_input = 1,
+                        dim_output = 2,                
+                        activation = c_nn["activ"],
+                        drop = c_nn["drop"], 
+                        with_bias= c_nn["with_bias"],
+                        drop_path_rate = c_nn["drop_path"],               
+                        learning_rate = c_train["lr"], 
+                        step_size= c_train["step_size"],
+                        gamma= c_train["gamma"],
+                        weight_decay= c_train["weight_decay"]
+                        
+                        )
     return model
