@@ -1,16 +1,13 @@
 # Fine-tuning Neural-Operator Architectures for Training and Generalization
 
-This is the official implementation of the paper "Fine-tuning Neural-Operator Architectures for Training and Generalization".
+This is the official implementation of the paper 
 
-> **Title:** Fine-tuning Neural-Operator Architectures for Training and Generalization
 
-> **Author(s):** Jose Antonio Lara Benitez, Takashi Furuya, Florian Faucher, Xavier Tricoche, and Maarten V de Hoop
+## Paper 
+
+Benitez, J., Furuya, T., Faucher, F., Kratsios, A., Tricoche, X., & de Hoop, M. V. (2023). Out-of-distributional risk bounds for neural operators with applications to the Helmholtz equation. arXiv preprint arXiv:2301.11509.
 
 > **Source:** [arXiv preprint arXiv:2301.11509](https://arxiv.org/abs/2301.11509)
-
-> **Year:** 2023
-
-
 
 ## Get Started (Libraries)
 
@@ -62,26 +59,3 @@ visualization_code
 We updated the sFNO+eps v2 to include layer LayerScale as mentioned in [@touvron2021going]
 
 If we remove LayerScale sFNO+eps v2 and sFNO+eps **long** v1 are equivalent. 
-
-# Paper 
-
-> **Author(s):** Hugo Touvron, Matthieu Cord, Alexandre Sablayrolles, Gabriel Synnaeve, and Herve Jégou.
-
-> **Title:** Going Deeper with Image Transformers.
-
-> **Year:** 2021.
-
-> **Source:** arXiv preprint arXiv:2103.17239.
-
-## Generating the dataset 
-'''
-@article{benitez2023out,
-  title={Out-of-distributional risk bounds for neural operators with applications to the Helmholtz equation},
-  author={Benitez, J and Furuya, Takashi and Faucher, Florian and Kratsios, Anastasis and Tricoche, Xavier and de Hoop, Maarten V},
-  journal={arXiv preprint arXiv:2301.11509},
-  year={2023}
-}
-'''
-
-
-
