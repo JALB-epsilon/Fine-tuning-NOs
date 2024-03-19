@@ -1,4 +1,4 @@
-# Fine-tuning Neural-Operator Architectures for Training and Generalization
+#  Out-of-distributional risk bounds for neural operators with applications to the Helmholtz equation
 
 This is the official implementation of the paper 
 
@@ -12,6 +12,12 @@ This is the official implementation of the paper
 **Year:** 2023
 
 > **Source:** [arXiv preprint arXiv:2301.11509](https://arxiv.org/abs/2301.11509)
+
+
+## Reproducing the Results
+
+If you wish to reproduce the results and experiments shown in the paper, including the baselines, follow the steps below:
+
 
 ## Get Started (Libraries)
 
@@ -63,3 +69,6 @@ visualization_code
 We updated the sFNO+eps v2 to include layer LayerScale as mentioned in [@touvron2021going]
 
 If we remove LayerScale sFNO+eps v2 and sFNO+eps **long** v1 are equivalent. 
+
+----------
+We hope you find this repository useful for your research and experiments. If you have any questions or issues, feel free to open an issue in this repository.
