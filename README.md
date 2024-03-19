@@ -63,6 +63,8 @@ We updated the sFNO+eps v2 to include layer LayerScale as mentioned in [@touvron
 
 If we remove LayerScale sFNO+eps v2 and sFNO+eps **long** v1 are equivalent. 
 
+# Paper 
+
 > **Author(s):** Hugo Touvron, Matthieu Cord, Alexandre Sablayrolles, Gabriel Synnaeve, and Herve Jégou.
 
 > **Title:** Going Deeper with Image Transformers.
@@ -72,7 +74,14 @@ If we remove LayerScale sFNO+eps v2 and sFNO+eps **long** v1 are equivalent.
 > **Source:** arXiv preprint arXiv:2103.17239.
 
 ## Generating the dataset 
-It is located in `dataset_time-harmonic-waves_hawen_parameters`
+'''
+@article{benitez2023out,
+  title={Out-of-distributional risk bounds for neural operators with applications to the Helmholtz equation},
+  author={Benitez, J and Furuya, Takashi and Faucher, Florian and Kratsios, Anastasis and Tricoche, Xavier and de Hoop, Maarten V},
+  journal={arXiv preprint arXiv:2301.11509},
+  year={2023}
+}
+'''
 
 
 
