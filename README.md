@@ -5,7 +5,11 @@ This is the official implementation of the paper
 
 ## Paper 
 
-Benitez, J., Furuya, T., Faucher, F., Kratsios, A., Tricoche, X., & de Hoop, M. V. (2023). Out-of-distributional risk bounds for neural operators with applications to the Helmholtz equation. arXiv preprint arXiv:2301.11509.
+**Title:** Out-of-distributional risk bounds for neural operators with applications to the Helmholtz equation
+
+**Authors:** Benitez, J., Furuya, T., Faucher, F., Kratsios, A., Tricoche, X., & de Hoop, M. V.
+
+**Year:** 2023
 
 > **Source:** [arXiv preprint arXiv:2301.11509](https://arxiv.org/abs/2301.11509)
 
